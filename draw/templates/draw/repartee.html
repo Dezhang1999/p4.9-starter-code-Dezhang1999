@@ -27,6 +27,52 @@
         h1 {
             text-align: center;
         }
+        
+        #comment-adder{
+            width: 800px;
+            border: 5px solid red;
+            display: grid;
+            margin-left: 150px;
+            margin-top: 20px;
+        }
+
+        #comments{
+            height: 100px;
+        }
+        
+        #add-comments{
+            display: block;
+            margin-top: 10px;
+        }
+
+        .comment{
+            width: 800px;
+            border: 5px solid red;
+            display: grid;
+            margin-top: 20px;
+            margin-left: 150px;
+            text-align: center;
+        }
+        #homepage{
+            margin: auto;
+            text-align: center;
+            display: flex;
+        }
+        #update{
+            margin: auto;
+            text-align: center;
+            display: flex;
+            margin-top: 10px;
+        }
+        #timer{
+            width: 800px;
+            border: 5px solid red;
+            display: grid;
+            margin-top: 20px;
+            margin-left: 155px;
+            text-align: center;
+            padding-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -34,24 +80,111 @@
     <!-- You may change the dimensions of this canvas -->
     <div class="container">
         <div id = "info-container"></div>
+        <button id="homepage" onclick="homepage()">Back to homepage</button>
+        <button id="update">Update Book</button>
+        <div id = "timer">
+            <div id = "currentTimer">
+                <h1 id = "timeleft"></h1>
+            </div>
+            <input id="time" placeholder="Enter Time In Minutes > 0">
+            <button id="time-button" onclick="startTime()">Set Timer</button>
+        </div>
         <iframe src="https://people.eecs.berkeley.edu/~vazirani/algorithms/chap2.pdf" width="800" height="900" id="pdf"
             type="application/pdf"></iframe>
-        <button onClick="update()">Update Book</button>
+        <div id = "comment-adder">
+            <input placeholder="Add your comments here" id="comments">
+            <input placeholder="Your Name(Optional)" id = "name">
+            <button id= "add-comments" onclick="addComment()"> Add Comments</button>
+        </div>
+        <div class = "comment-conatiner">
+        </div>
     </div>
 
 </body>
 <script>
+    var timeId = null;
     function load() {
         var event = JSON.parse(localStorage.getItem('event'));
         console.log(event);
         $("#pdf").attr("src",event.bookurl);
-        $("#info-container").append("<h1> Host Name: "+event.hostname+"</h1>");
-        $("#info-container").append("<h1> Meeting ID: "+event.meetingid+"</h1>");
+        $("#info-container").append("<h1> Book Name: "+event.hostname+"</h1>");
+        $("#info-container").append("<h1> Community ID: "+event.meetingid+"</h1>");
+
+        var comments = localStorage.getItem('comments');
+        if(comments != null){
+            comments = JSON.parse(comments); 
+            var list = comments[event.meetingid]; 
+            for(var i = list.length-1; i>=0; i--){
+                $(".comment-conatiner").append("<div class='comment'>"+list[i]+"<br></div>");
+            }          
+        }
     }
 
     function update() {
         window.location.replace("http://127.0.0.1:8000/draw/upload");
     }
+
+    function homepage(){
+        window.location.replace("http://127.0.0.1:8000/draw/");
+    }
+
+    function startTime(){
+        var time = Number($("#time").val());
+        clearInterval(timeId);
+        if(time == NaN){
+            alert("Please Enter An Valid Number");
+        }else if(time<=0){
+            alert("Please Enter An Valid time value > 0 in");
+        }else{
+            $("#timeleft").empty();
+            $("#timeleft").text(time+" Min Left");
+            timeID = setInterval(function(){
+                time--;
+                if(time == 10 || time == 5 || time == 1){
+                    alert(time + " Minute(s) Left!");
+                }
+                if(time <= 0){
+                    clearInterval(timeId);
+                }
+                if(time>0){
+                    $("#timeleft").empty();
+                    $("#timeleft").text(time+" Min Left");
+                }else{
+                    $("#timeleft").empty();
+                }
+            },60000);
+        }
+        clearInterval(timeId);
+    }
+
+    function addComment(){
+        //Store Comment as id -> [Comments]
+        var name = $("#name").val();
+        name = name.length == 0 ? "Anonymous" : name;
+        var commentToAdd = $("#comments").val() + " <br>"+name+" commented On "+new Date().toLocaleString();
+        $(".comment-conatiner").prepend("<div class='comment'>"+commentToAdd+"<br></div>");
+        var comments = localStorage.getItem('comments');
+        var event = JSON.parse(localStorage.getItem('event'));
+    
+        if(comments == null){
+            var commentList = [];
+            commentList.push(commentToAdd);
+            comments = {};
+            comments[event.meetingid] = commentList;
+            localStorage.setItem('comments',JSON.stringify(comments));
+        }else{
+            comments = JSON.parse(comments);
+            if(comments[event.meetingid] == undefined){
+                comments[event.meetingid] = [commentToAdd];
+            }else{
+                var list = comments[event.meetingid];
+                list.push(commentToAdd);
+                comments[event.meetingid] = list;
+            }
+            localStorage.setItem('comments',JSON.stringify(comments));
+        }
+    }
+
 
     // setting up the canvas and one paper tool
     var canvas = document.getElementById('myCanvas');
