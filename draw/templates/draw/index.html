@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>P4 Drawing</title>
+    <title>Repartee</title>
 
     <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
@@ -12,106 +12,107 @@
 
     <style type="text/css">
     </style>
+    <style>
+        body{
+            background-color: bisque;
+            display: block;
+        }
 
+        iframe{
+            display: block;
+            margin: auto;
+        }
+        h1{
+            text-align: center;
+        }
+    </style>
 </head>
-<body>
+<body onLoad="load()">
     <!-- You may change the dimensions of this canvas -->
-    <canvas id="myCanvas" width="750px" height="750px"></canvas>
+    <div class = "container">
+        <div class = "meetingContainer">
+            <input placeholder="Create host name" id = "creat-host">
+            <input placeholder="Create event id" id = "meeting-id">
+            <input placeholder="Enter book url" id = "book-url">
+            <button onclick="onClick()">Create Event</button>
+        </div>
+        <div class ="joinContainer">
+            <input placeholder="Enter Host Name" id = "check-host">
+            <input placeholder="Enter event id" id = "event-id">
+            <button onclick="join()">Join Event</button>
+        </div>
+        <button onclick="clear()"> Clear </button>
+    </div>
+
 </body>
 <script>
-
-    // setting up the canvas and one paper tool
-    var canvas = document.getElementById('myCanvas');
-    paper.setup(canvas);
-    var tool = new paper.Tool();
-    var path = new paper.Path();
-    var uid = Date.now() % 10000;
-    var originalColor = randomColor();
-    path.strokeColor = originalColor;
-    // getting the URL (you may want to use for Exercise 3)
     var url = window.location.href;
 
-    var socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/draw');
-    
-    // Useful functionx
     var size = getSize(url);
 
-    function randomColor(){
-        var char = '0123456789ABCDEF';
-        var result = '#';
-        for(var i = 0; i<6; i++){
-            result+= char[Math.floor(Math.random()*16)];
-        }
-        return result;
+    function clear(){
+        window.localStorage.clear();
     }
-
-    function getSize(url){
-        var begin = url.indexOf('=')+1;
+    function getSize(url) {
+        var begin = url.indexOf('=') + 1;
         var result = '';
-        while(begin < url.length){
+        while (begin < url.length) {
             result += url[begin];
             begin++;
         }
         return result;
     }
 
-    //Interactivity Functions
-    tool.onMouseDown = function(event){
-        if(size == 'small'){
-            path = new paper.Path();
-            path.strokeColor = originalColor;
-            var data = {
-                newPath: true,
-                uid: uid
-            }
-            socket.send(JSON.stringify(data));
+    function load(){
+        if(size == 'phone'){
+            $(".meetingContainer").hide();
         }
     }
-    
-    tool.onMouseDrag = function(event){
-        if(size == 'small'){
-            path.strokeColor = originalColor;
-            path.add(event.point);
-            var pointInfo = {
-            color: originalColor,
-            x: event.point.x,
-            y: event.point.y,
-            uid: uid,
-            }
-            socket.send(JSON.stringify(pointInfo));
-        }
+    // Below are function and objects to handle login info
+    var ids = {}
+    var events = {}
+    if(JSON.parse(localStorage.getItem('ids')) != undefined){
+        ids = JSON.parse(localStorage.getItem('ids'));
     }
-    /*
-   tool.onMouseMove = function(event){
-       path.add(event.point);
-       path = new paper.Path();
-       
-       var pointInfo = {
-        color: originalColor,
-        x: event.point.x,
-        y: event.point.y,
-        uid: uid,
-       }
-       socket.send(JSON.stringify(pointInfo));
-   }*/
-    socket.onmessage = function(receivedMessage) {
-        var received = JSON.parse(receivedMessage.data);
-        console.log(received);
-        // You will probably want to add some code here to draw more lines.
-        if(received.newPath != undefined && received.uid != undefined){
-            if(size == 'large' && received.uid != uid)path = new paper.Path();
-        }else {
-            if((received.uid != uid && size == 'large')){
-                path.strokeColor = received.color;
-                path.add(received.x,received.y);
+    if(JSON.parse(localStorage.getItem('events')) != undefined){
+        events = JSON.parse(localStorage.getItem('events'));
+    }
+    console.log(events)
+    function onClick(){
+        console.log(ids);
+        var eventID = $("#meeting-id").val();
+        var hostName = $("#creat-host").val();
+        if(eventID in ids){
+            alert("There's already a event with this id");
+        }else{
+            if($("#meeting-id").val() != "" && $("#book-url").val() != "" && hostName != ""){
+                ids[eventID] = hostName;
+                var eventInfo = {
+                    hostname: $("#creat-host").val(),
+                    meetingid: $("#meeting-id").val(),
+                    bookurl: $("#book-url").val(),
+                }
+                events[eventID] = JSON.stringify(eventInfo);
+                localStorage.setItem('ids',JSON.stringify(ids));
+                localStorage.setItem('events',JSON.stringify(events));
+                localStorage.setItem('event', JSON.stringify(eventInfo));
+                window.location.replace("http://127.0.0.1:8000/draw/repartee");
             }
         }
     }
-
-    socket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
+    function join(){
+        var eventID = $("#event-id").val();
+        var hostName = $("#check-host").val();
+        console.log(events);
+        if(eventID in ids && ids[eventID] == hostName){
+            console.log(events);
+            localStorage.setItem('event',events[eventID]);
+            window.location.replace("http://127.0.0.1:8000/draw/repartee");
+        }else if(!(eventID in ids)){
+            alert("Event id "+ eventID + " does not exsists!");
+        }else{
+            alert("Host name for id "+ eventID+ " doesn't match please double check");
+        }
+    }
 </script>
 </html>

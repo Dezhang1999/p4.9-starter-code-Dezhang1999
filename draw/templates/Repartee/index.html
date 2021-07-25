@@ -1,0 +1,117 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Repartee</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+
+    <style type="text/css">
+    </style>
+
+</head>
+<body>
+    <!-- You may change the dimensions of this canvas -->
+    <canvas id="myCanvas" width="750px" height="750px"></canvas>
+</body>
+<script>
+
+    // setting up the canvas and one paper tool
+    var canvas = document.getElementById('myCanvas');
+    paper.setup(canvas);
+    var tool = new paper.Tool();
+    var path = new paper.Path();
+    var uid = Date.now() % 10000;
+    var originalColor = randomColor();
+    path.strokeColor = originalColor;
+    // getting the URL (you may want to use for Exercise 3)
+    var url = window.location.href;
+
+    var socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/draw');
+    
+    // Useful functionx
+    var size = getSize(url);
+
+    function randomColor(){
+        var char = '0123456789ABCDEF';
+        var result = '#';
+        for(var i = 0; i<6; i++){
+            result+= char[Math.floor(Math.random()*16)];
+        }
+        return result;
+    }
+
+    function getSize(url){
+        var begin = url.indexOf('=')+1;
+        var result = '';
+        while(begin < url.length){
+            result += url[begin];
+            begin++;
+        }
+        return result;
+    }
+
+    //Interactivity Functions
+    tool.onMouseDown = function(event){
+        if(size == 'small'){
+            path = new paper.Path();
+            path.strokeColor = originalColor;
+            var data = {
+                newPath: true,
+                uid: uid
+            }
+            socket.send(JSON.stringify(data));
+        }
+    }
+    
+    tool.onMouseDrag = function(event){
+        if(size == 'small'){
+            path.strokeColor = originalColor;
+            path.add(event.point);
+            var pointInfo = {
+            color: originalColor,
+            x: event.point.x,
+            y: event.point.y,
+            uid: uid,
+            }
+            socket.send(JSON.stringify(pointInfo));
+        }
+    }
+    /*
+   tool.onMouseMove = function(event){
+       path.add(event.point);
+       path = new paper.Path();
+       
+       var pointInfo = {
+        color: originalColor,
+        x: event.point.x,
+        y: event.point.y,
+        uid: uid,
+       }
+       socket.send(JSON.stringify(pointInfo));
+   }*/
+    socket.onmessage = function(receivedMessage) {
+        var received = JSON.parse(receivedMessage.data);
+        console.log(received);
+        // You will probably want to add some code here to draw more lines.
+        if(received.newPath != undefined && received.uid != undefined){
+            if(size == 'large' && received.uid != uid)path = new paper.Path();
+        }else {
+            if((received.uid != uid && size == 'large')){
+                path.strokeColor = received.color;
+                path.add(received.x,received.y);
+            }
+        }
+    }
+
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+</script>
+</html>
