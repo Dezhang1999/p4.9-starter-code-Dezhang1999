@@ -15,6 +15,7 @@
     </style>
     <style>
         body {
+            background-image: url("https://i.pinimg.com/originals/67/18/22/671822c2f63dd5f65d8fd15c9710420b.jpg");
             background-color: bisque;
             display: block;
         }
@@ -26,6 +27,7 @@
 
         h1 {
             text-align: center;
+            color: wheat;
         }
 
         #comment-adder {
@@ -72,8 +74,8 @@
             border: 5px solid red;
             display: grid;
             margin-top: 20px;
-            margin-left: 155px;
             text-align: center;
+            margin-left: 78px;
             padding-bottom: 10px;
         }
         .alertMessage{
@@ -84,8 +86,13 @@
             background-color: aquamarine;
             width: 800px;
             text-align: center;
-            margin-left: 150px;
             margin-top: 10px;
+            margin-left: 85px;
+            font-family: 'Inconsolata', monospace;
+            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
         }
         #showButton{
             margin: auto;
@@ -93,6 +100,21 @@
             margin-bottom: 10px;
             text-align: center;
             display: flex;
+        }
+
+        .container {
+            font-family: 'Inconsolata', monospace;
+            width: 1000px;
+            height: 100%;
+            position: fixed; /*Can also be `fixed`*/
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 1;
+            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
         }
     </style>
 </head>
@@ -114,12 +136,12 @@
         <button id = "showButton" onclick="showRoom()">Show Chat Room</button>
         <div class = "chatroom">
             <h1>Chat Room</h1>
+            <div class="comment-conatiner">
+            </div>
             <div id="comment-adder">
                 <input placeholder="Your Message Here" id="comments">
                 <input placeholder="Your Name(Optional)" id="name">
                 <button id="add-comments" onclick="addComment()"> Send</button>
-            </div>
-            <div class="comment-conatiner">
             </div>
         </div>
     </div>
@@ -133,6 +155,7 @@
     var url = window.location.href;
     var size = getSize(url);
     var roomShow = false;
+    var numOFComments = 5;
 
     function getSize(url) {
         var begin = url.indexOf('=') + 1;
@@ -158,8 +181,10 @@
             if (comments != null) {
                 comments = JSON.parse(comments);
                 var list = comments[event.meetingid];
-                for (var i = list.length - 1; i >= 0; i--) {
-                    $(".comment-conatiner").append("<div class='comment'>" + list[i] + "<br></div>");
+                for (var i = 0; i < numOFComments; i++) {
+                    if(list.length - 1-i >= 0){
+                        $(".comment-conatiner").prepend($("<div class='comment'>" + list[list.length - 1-i] + "<br></div>"));
+                    }
                 }
             }
             $(".chatroom").hide();
@@ -237,10 +262,16 @@
                 author: name,
                 commentMessage: $("#comments").val()
             }
+            checkLength();
             socket.send(JSON.stringify(info));
         }
     }
 
+    function checkLength(){
+        if($(".comment").length + 1 > numOFComments){
+            $(".comment").first().remove();
+        }
+    }
     function showRoom(){
         if(!roomShow){
             $(".chatroom").show();
@@ -261,7 +292,7 @@
     socket.onmessage = function (receivedMessage) {
         var received = JSON.parse(receivedMessage.data);
         if (received.id == event.meetingid) {
-            $(".comment-conatiner").prepend("<div class='comment'>" + received.comment + "<br></div>");
+            $(".comment-conatiner").append($("<div class='comment'>" + received.comment + "<br></div>"));
         }
     }
 

@@ -15,6 +15,7 @@
     </style>
     <style>
         body {
+            background-image: url("https://i.pinimg.com/originals/67/18/22/671822c2f63dd5f65d8fd15c9710420b.jpg");
             background-color: bisque;
             display: block;
         }
@@ -23,10 +24,16 @@
         }
         h1{
             text-align: center;
+            color: wheat;
         }
         img{
             height: 500px;
             width: 500px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+        }
+        button{
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -35,6 +42,7 @@
     <!-- You may change the dimensions of this canvas -->
     <div class = "container">
         <div class = "info">
+            <button id = "homepage" onclick="homepage()">Back to homepage</button>
             <div class ="image-container">
                 <img src = "https://m.media-amazon.com/images/I/41tWxjG3uKL.jpg" onclick="toBook()">
                 <img src = "https://images-na.ssl-images-amazon.com/images/I/71NIrX79-HL.jpg" onclick="toBook()">
@@ -74,6 +82,9 @@
         window.location.replace("http://127.0.0.1:8000/draw?size="+size);
     }
 
+    function homepage(){
+        window.location.replace("http://127.0.0.1:8000/draw/repartee?size="+size);
+    }
 </script>
 
 </html>

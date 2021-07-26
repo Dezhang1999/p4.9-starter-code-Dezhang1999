@@ -6,6 +6,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Repartee</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
     <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
@@ -14,22 +18,43 @@
     </style>
     <style>
         body{
+            background-image: url("https://i.pinimg.com/originals/67/18/22/671822c2f63dd5f65d8fd15c9710420b.jpg");
             background-color: bisque;
             display: block;
         }
-
-        iframe{
-            display: block;
-            margin: auto;
-        }
         h1{
             text-align: center;
+            font-family: 'Inconsolata', monospace;
         }
+        button{
+            width: 101%;
+            margin-top: 10px;
+            
+        }
+        input{
+            width: 100%;
+        }
+        .container {
+            font-family: 'Inconsolata', monospace;
+            width: 300px;
+            height: 600px;
+            position: fixed; /*Can also be `fixed`*/
+            left: 0;
+            right: 0;
+            top: 20%;
+            bottom: 0;
+            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
+        }
+
     </style>
 </head>
 <body onLoad="load()">
     <!-- You may change the dimensions of this canvas -->
     <div class = "container">
+        <h1>Welcome to Repartee</h1>
         <div class = "meetingContainer">
             <input placeholder="Create community" id = "meeting-id">
             <input placeholder="Enter book name" id = "creat-host">
@@ -42,6 +67,7 @@
             <button onclick="join()">Join Event</button>
         </div>
         <div class = "searchContainer">
+            <h1>Or</h1>
             <input placeholder="Search your community" id = "search">
             <button onclick="search()">Search</button>
         </div>
