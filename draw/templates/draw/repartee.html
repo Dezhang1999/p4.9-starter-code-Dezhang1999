@@ -152,9 +152,9 @@
             localStorage.setItem('event',events[eventID]);
             window.location.replace("http://127.0.0.1:8000/draw?size="+size);
         }else if(!(eventID in ids)){
-            alert("Event id "+ eventID + " does not exsists!");
+            alert("Community "+ eventID + " does not exsists!");
         }else{
-            alert("Host name for id "+ eventID+ " doesn't match please double check");
+            alert("Book name for id "+ eventID+ " doesn't match please double check");
         }
     }
 
