@@ -2,7 +2,6 @@
 
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Repartee</title>
@@ -14,204 +13,49 @@
     <style type="text/css">
     </style>
     <style>
-        body {
+        body{
             background-color: bisque;
             display: block;
         }
 
-        iframe {
+        iframe{
             display: block;
             margin: auto;
         }
-
-        h1 {
+        h1{
             text-align: center;
-        }
-        
-        #comment-adder{
-            width: 800px;
-            border: 5px solid red;
-            display: grid;
-            margin-left: 150px;
-            margin-top: 20px;
-        }
-
-        #comments{
-            height: 100px;
-        }
-        
-        #add-comments{
-            display: block;
-            margin-top: 10px;
-        }
-
-        .comment{
-            width: 800px;
-            border: 5px solid red;
-            display: grid;
-            margin-top: 20px;
-            margin-left: 150px;
-            text-align: center;
-        }
-        #homepage{
-            margin: auto;
-            text-align: center;
-            display: flex;
-        }
-        #update{
-            margin: auto;
-            text-align: center;
-            display: flex;
-            margin-top: 10px;
-        }
-        #timer{
-            width: 800px;
-            border: 5px solid red;
-            display: grid;
-            margin-top: 20px;
-            margin-left: 155px;
-            text-align: center;
-            padding-bottom: 10px;
         }
     </style>
 </head>
-
 <body onLoad="load()">
     <!-- You may change the dimensions of this canvas -->
-    <div class="container">
-        <div id = "info-container"></div>
-        <button id="homepage" onclick="homepage()">Back to homepage</button>
-        <button id="update">Update Book</button>
-        <div id = "timer">
-            <div id = "currentTimer">
-                <h1 id = "timeleft"></h1>
-            </div>
-            <input id="time" placeholder="Enter Time In Minutes > 0">
-            <button id="time-button" onclick="startTime()">Set Timer</button>
+    <div class = "container">
+        <div class = "meetingContainer">
+            <input placeholder="Create community" id = "meeting-id">
+            <input placeholder="Enter book name" id = "creat-host">
+            <input placeholder="Enter book url" id = "book-url">
+            <button onclick="onClick()">Upload Book</button>
         </div>
-        <iframe src="https://people.eecs.berkeley.edu/~vazirani/algorithms/chap2.pdf" width="800" height="900" id="pdf"
-            type="application/pdf"></iframe>
-        <div id = "comment-adder">
-            <input placeholder="Add your comments here" id="comments">
-            <input placeholder="Your Name(Optional)" id = "name">
-            <button id= "add-comments" onclick="addComment()"> Add Comments</button>
+        <div class ="joinContainer">
+            <input placeholder="Enter book name" id = "check-host">
+            <input placeholder="Enter community id" id = "event-id">
+            <button onclick="join()">Join Event</button>
         </div>
-        <div class = "comment-conatiner">
+        <div class = "searchContainer">
+            <input placeholder="Search your community" id = "search">
+            <button onclick="search()">Search</button>
         </div>
     </div>
 
 </body>
 <script>
-    var timeId = null;
-    function load() {
-        var event = JSON.parse(localStorage.getItem('event'));
-        console.log(event);
-        $("#pdf").attr("src",event.bookurl);
-        $("#info-container").append("<h1> Book Name: "+event.hostname+"</h1>");
-        $("#info-container").append("<h1> Community ID: "+event.meetingid+"</h1>");
-
-        var comments = localStorage.getItem('comments');
-        if(comments != null){
-            comments = JSON.parse(comments); 
-            var list = comments[event.meetingid]; 
-            for(var i = list.length-1; i>=0; i--){
-                $(".comment-conatiner").append("<div class='comment'>"+list[i]+"<br></div>");
-            }          
-        }
-    }
-
-    function update() {
-        window.location.replace("http://127.0.0.1:8000/draw/upload");
-    }
-
-    function homepage(){
-        window.location.replace("http://127.0.0.1:8000/draw/");
-    }
-
-    function startTime(){
-        var time = Number($("#time").val());
-        clearInterval(timeId);
-        if(time == NaN){
-            alert("Please Enter An Valid Number");
-        }else if(time<=0){
-            alert("Please Enter An Valid time value > 0 in");
-        }else{
-            $("#timeleft").empty();
-            $("#timeleft").text(time+" Min Left");
-            timeID = setInterval(function(){
-                time--;
-                if(time == 10 || time == 5 || time == 1){
-                    alert(time + " Minute(s) Left!");
-                }
-                if(time <= 0){
-                    clearInterval(timeId);
-                }
-                if(time>0){
-                    $("#timeleft").empty();
-                    $("#timeleft").text(time+" Min Left");
-                }else{
-                    $("#timeleft").empty();
-                }
-            },60000);
-        }
-        clearInterval(timeId);
-    }
-
-    function addComment(){
-        //Store Comment as id -> [Comments]
-        var name = $("#name").val();
-        name = name.length == 0 ? "Anonymous" : name;
-        var commentToAdd = $("#comments").val() + " <br>"+name+" commented On "+new Date().toLocaleString();
-        $(".comment-conatiner").prepend("<div class='comment'>"+commentToAdd+"<br></div>");
-        var comments = localStorage.getItem('comments');
-        var event = JSON.parse(localStorage.getItem('event'));
-    
-        if(comments == null){
-            var commentList = [];
-            commentList.push(commentToAdd);
-            comments = {};
-            comments[event.meetingid] = commentList;
-            localStorage.setItem('comments',JSON.stringify(comments));
-        }else{
-            comments = JSON.parse(comments);
-            if(comments[event.meetingid] == undefined){
-                comments[event.meetingid] = [commentToAdd];
-            }else{
-                var list = comments[event.meetingid];
-                list.push(commentToAdd);
-                comments[event.meetingid] = list;
-            }
-            localStorage.setItem('comments',JSON.stringify(comments));
-        }
-    }
-
-
-    // setting up the canvas and one paper tool
-    var canvas = document.getElementById('myCanvas');
-    paper.setup(canvas);
-    var tool = new paper.Tool();
-    var path = new paper.Path();
-    var uid = Date.now() % 10000;
-    var originalColor = randomColor();
-    path.strokeColor = originalColor;
-    // getting the URL (you may want to use for Exercise 3)
     var url = window.location.href;
 
-    var socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/draw');
-
-    // Useful functionx
     var size = getSize(url);
 
-    function randomColor() {
-        var char = '0123456789ABCDEF';
-        var result = '#';
-        for (var i = 0; i < 6; i++) {
-            result += char[Math.floor(Math.random() * 16)];
-        }
-        return result;
+    function clear(){
+        window.localStorage.clear();
     }
-
     function getSize(url) {
         var begin = url.indexOf('=') + 1;
         var result = '';
@@ -221,64 +65,80 @@
         }
         return result;
     }
-
-    //Interactivity Functions
-    tool.onMouseDown = function (event) {
-        if (size == 'small') {
-            path = new paper.Path();
-            path.strokeColor = originalColor;
-            var data = {
-                newPath: true,
-                uid: uid
-            }
-            socket.send(JSON.stringify(data));
-        }
-    }
-
-    tool.onMouseDrag = function (event) {
-        if (size == 'small') {
-            path.strokeColor = originalColor;
-            path.add(event.point);
-            var pointInfo = {
-                color: originalColor,
-                x: event.point.x,
-                y: event.point.y,
-                uid: uid,
-            }
-            socket.send(JSON.stringify(pointInfo));
-        }
-    }
-    /*
-   tool.onMouseMove = function(event){
-       path.add(event.point);
-       path = new paper.Path();
-       
-       var pointInfo = {
-        color: originalColor,
-        x: event.point.x,
-        y: event.point.y,
-        uid: uid,
-       }
-       socket.send(JSON.stringify(pointInfo));
-   }*/
+    var socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/draw');
+    
     socket.onmessage = function (receivedMessage) {
         var received = JSON.parse(receivedMessage.data);
-        console.log(received);
-        // You will probably want to add some code here to draw more lines.
-        if (received.newPath != undefined && received.uid != undefined) {
-            if (size == 'large' && received.uid != uid) path = new paper.Path();
-        } else {
-            if ((received.uid != uid && size == 'large')) {
-                path.strokeColor = received.color;
-                path.add(received.x, received.y);
+        console.log(JSON.stringify(received));
+    }
+    function load(){
+        if(size == 'phone' || size == 'desktop'){
+            if(size == 'phone'){
+                $(".meetingContainer").hide();
+            }else if(size == 'desktop'){
+                $(".joinContainer").hide();
+                $(".searchContainer").hide();
+            }
+        }else{
+            $("body").append("<h1> Check your URL, Specify Your Mode With ?=phone/desktop in the end of url!<h1>");
+            $(".container").hide();
+        }
+    }
+    // Below are function and objects to handle login info
+    var ids = {}
+    var events = {}
+    if(JSON.parse(localStorage.getItem('ids')) != undefined){
+        ids = JSON.parse(localStorage.getItem('ids'));
+    }
+    if(JSON.parse(localStorage.getItem('events')) != undefined){
+        events = JSON.parse(localStorage.getItem('events'));
+    }
+    function onClick(){
+        console.log(ids);
+        var eventID = $("#meeting-id").val();
+        var hostName = $("#creat-host").val();
+        if(eventID in ids){
+            alert("There's already a event with this id");
+        }else{
+            if($("#meeting-id").val() != "" && $("#book-url").val() != "" && hostName != ""){
+                ids[eventID] = hostName;
+                var eventInfo = {
+                    hostname: $("#creat-host").val(),
+                    meetingid: $("#meeting-id").val(),
+                    bookurl: $("#book-url").val(),
+                }
+                events[eventID] = JSON.stringify(eventInfo);
+                localStorage.setItem('ids',JSON.stringify(ids));
+                localStorage.setItem('events',JSON.stringify(events));
+                localStorage.setItem('event', JSON.stringify(eventInfo));
+                window.location.replace("http://127.0.0.1:8000/draw?size="+size);
             }
         }
     }
+    function join(){
+        var eventID = $("#event-id").val();
+        var hostName = $("#check-host").val();
+        console.log(events);
+        if(eventID in ids && ids[eventID] == hostName){
+            console.log(events);
+            localStorage.setItem('event',events[eventID]);
+            window.location.replace("http://127.0.0.1:8000/draw?size="+size);
+        }else if(!(eventID in ids)){
+            alert("Event id "+ eventID + " does not exsists!");
+        }else{
+            alert("Host name for id "+ eventID+ " doesn't match please double check");
+        }
+    }
 
-    socket.onclose = function (e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
+    function search(){
+        var eventID = $("#search").val();
+        if(!ids.hasOwnProperty(eventID)){
+            alert(eventID + " community has not been created yet! Please create at our desktop app!");
+        }else{
+            localStorage.setItem('event', events[eventID]);
+            window.location.replace("http://127.0.0.1:8000/draw/search?size="+size);
+        }
+    }
 </script>
-
 </html>

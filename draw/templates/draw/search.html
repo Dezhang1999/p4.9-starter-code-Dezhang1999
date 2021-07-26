@@ -1,0 +1,79 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Repartee</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'draw/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <script type="text/javascript" src="{% static 'draw/vendor/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
+
+    <style type="text/css">
+    </style>
+    <style>
+        body {
+            background-color: bisque;
+            display: block;
+        }
+        .info{
+            text-align: center;
+        }
+        h1{
+            text-align: center;
+        }
+        img{
+            height: 500px;
+            width: 500px;
+        }
+    </style>
+</head>
+
+<body onload = "onload()">
+    <!-- You may change the dimensions of this canvas -->
+    <div class = "container">
+        <div class = "info">
+            <div class ="image-container">
+                <img src = "https://m.media-amazon.com/images/I/41tWxjG3uKL.jpg" onclick="toBook()">
+                <img src = "https://images-na.ssl-images-amazon.com/images/I/71NIrX79-HL.jpg" onclick="toBook()">
+                <img src = "https://m.media-amazon.com/images/I/51z5Hi7uHsL.jpg" onclick="toBook()">
+                <img src = "https://www.kdnuggets.com/images/james-witten-hastie-tibs-isl-r-400.jpg" onclick="toBook()">
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    var url = window.location.href;
+    var size = getSize(url);
+
+    function onload(){
+        if(size == 'phone'){
+            var event = JSON.parse(localStorage.getItem('event'));
+            console.log(typeof(event));
+            $(".info").prepend("<h1> Welcome to Community " + event.meetingid + "</h1>");
+        }else{
+            $("body").append("<h1> Check your URL, Specify Your Mod With ?=phone/desktop in the end of url!<h1>");
+            $(".container").hide();
+        }
+    }
+
+    function getSize(url) {
+        var begin = url.indexOf('=') + 1;
+        var result = '';
+        while (begin < url.length) {
+            result += url[begin];
+            begin++;
+        }
+        return result;
+    }
+
+    function toBook(){
+        window.location.replace("http://127.0.0.1:8000/draw?size="+size);
+    }
+
+</script>
+
+</html>
