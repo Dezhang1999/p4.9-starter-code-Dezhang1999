@@ -24,7 +24,8 @@
         }
         h1{
             text-align: center;
-            color: wheat;
+            color: aliceblue;
+            font-size: 500%;
         }
         img{
             height: 500px;
@@ -61,7 +62,7 @@
         if(size == 'phone'){
             var event = JSON.parse(localStorage.getItem('event'));
             console.log(typeof(event));
-            $(".info").prepend("<h1> Welcome to Community " + event.meetingid + "</h1>");
+            $(".info").prepend("<h1> Welcome to the " + event.meetingid + " Community</h1>");
         }else{
             $("body").append("<h1> Check your URL, Specify Your Mod With ?=phone/desktop in the end of url!<h1>");
             $(".container").hide();

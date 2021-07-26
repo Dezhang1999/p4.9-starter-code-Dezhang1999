@@ -16,7 +16,6 @@
     <style>
         body {
             background-image: url("https://i.pinimg.com/originals/67/18/22/671822c2f63dd5f65d8fd15c9710420b.jpg");
-            background-color: bisque;
             display: block;
         }
 
@@ -30,9 +29,14 @@
             color: wheat;
         }
 
+        h2{
+            text-align: center;
+            color:wheat;
+            font-weight: bold;
+        }
+
         #comment-adder {
             width: 800px;
-            border: 5px solid red;
             display: grid;
             margin-top: 20px;
         }
@@ -71,7 +75,6 @@
 
         #timer {
             width: 800px;
-            border: 5px solid red;
             display: grid;
             margin-top: 20px;
             text-align: center;
@@ -83,7 +86,7 @@
             background-color: red;
         }
         .chatroom{
-            background-color: aquamarine;
+            background-color: black;
             width: 800px;
             text-align: center;
             margin-top: 10px;
@@ -172,8 +175,8 @@
             var event = JSON.parse(localStorage.getItem('event'));
             console.log(event);
             $("#pdf").attr("src", event.bookurl);
-            $("#info-container").append("<h1> Community : " + event.meetingid + "</h1>");
-            $("#info-container").append("<h1> Book Name: " + event.hostname + "</h1>");
+            $("#info-container").append("<h2> Community : " + event.meetingid + "</h2>");
+            $("#info-container").append("<h2> Book Name: " + event.hostname + "</h2>");
             if(size!='phone'){
                 $("#timer").hide();
             }
@@ -227,7 +230,7 @@
                     $("#timeleft").empty();
                     $("#timeleft").append("<div class ='alertMessage'><h2>Your Time is Up! </h2></div>");
                 }
-            }, 60000);
+            }, 6000);
         }
         clearInterval(timeId);
     }
@@ -262,7 +265,6 @@
                 author: name,
                 commentMessage: $("#comments").val()
             }
-            checkLength();
             socket.send(JSON.stringify(info));
         }
     }
@@ -292,6 +294,7 @@
     socket.onmessage = function (receivedMessage) {
         var received = JSON.parse(receivedMessage.data);
         if (received.id == event.meetingid) {
+            checkLength();
             $(".comment-conatiner").append($("<div class='comment'>" + received.comment + "<br></div>"));
         }
     }
